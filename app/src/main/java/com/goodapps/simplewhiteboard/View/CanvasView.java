@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -22,7 +21,7 @@ public class CanvasView extends View {
     private Bitmap bitmap;
     private Canvas bitmapCanvas;
     private Paint paintScreen;
-    private Paint paintLine;
+    private Paint paintBrush;
     private HashMap<Integer, Path> pathMap;
     private HashMap<Integer, Point> prevPointMap;
 
@@ -34,12 +33,13 @@ public class CanvasView extends View {
 
     void init() {
         paintScreen = new Paint();
-        paintLine = new Paint();
-        paintLine.setAntiAlias(true);
-        paintLine.setColor(Color.BLUE);
-        paintLine.setStrokeWidth(5);
+        paintBrush = new Paint();
+        paintBrush.setAntiAlias(true);
+        paintBrush.setColor(Color.BLUE);
+        paintBrush.setStrokeWidth(5);
         // End of line is round (as in microsoft whiteboard)
-        paintLine.setStrokeCap(Paint.Cap.ROUND);
+        paintBrush.setStrokeCap(Paint.Cap.ROUND);
+        paintBrush.setStyle(Paint.Style.STROKE); // default is FILL_AND_STROKE which is bad
 
         pathMap = new HashMap<>();
         prevPointMap = new HashMap<>();
@@ -58,7 +58,7 @@ public class CanvasView extends View {
         canvas.drawBitmap(bitmap, 0, 0, paintScreen);
 
         for (Integer key : pathMap.keySet()) {
-            canvas.drawPath(pathMap.get(key), paintLine);
+            canvas.drawPath(pathMap.get(key), paintBrush);
         }
     }
 
@@ -114,7 +114,6 @@ public class CanvasView extends View {
                     point.x = (int) newX;
                     point.y = (int) newY;
 
-                    // TODO: fix the drawing (not quite the line yet)
 
                 }
 

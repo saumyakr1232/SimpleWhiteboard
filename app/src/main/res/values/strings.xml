@@ -5,4 +5,12 @@
     <string name="green">Green</string>
     <string name="blue">Blue</string>
     <string name="done">Done</string>
+    <string name="redo">Redo</string>
+    <string name="undo">Undo</string>
+    <string name="brush_width">Brush Width</string>
+    <string name="brush">Brush</string>
+    <string name="eraser">Eraser</string>
+    <string name="control_center">Control Center</string>
+    <string name="clear">Clear</string>
+    <string name="button_save">Button Save</string>
 </resources>

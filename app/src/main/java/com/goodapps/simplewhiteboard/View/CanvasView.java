@@ -13,6 +13,9 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.goodapps.simplewhiteboard.Utils.Helper;
+
+import java.io.IOException;
 import java.util.HashMap;
 
 public class CanvasView extends View {
@@ -21,7 +24,9 @@ public class CanvasView extends View {
     private Bitmap bitmap;
     private Canvas bitmapCanvas;
     private Paint paintScreen;
+    private Paint activeBrush;
     private Paint paintBrush;
+    private Paint eraser;
     private HashMap<Integer, Path> pathMap;
     private HashMap<Integer, Point> prevPointMap;
 
@@ -41,8 +46,16 @@ public class CanvasView extends View {
         paintBrush.setStrokeCap(Paint.Cap.ROUND);
         paintBrush.setStyle(Paint.Style.STROKE); // default is FILL_AND_STROKE which is bad
 
+        eraser = new Paint();
+        eraser.setAntiAlias(true);
+        eraser.setColor(Color.WHITE);
+        eraser.setStrokeWidth(15);
+        eraser.setStrokeCap(Paint.Cap.ROUND);
+        eraser.setStyle(Paint.Style.STROKE);
         pathMap = new HashMap<>();
         prevPointMap = new HashMap<>();
+
+        activeBrush = paintBrush;
 
     }
 
@@ -58,7 +71,7 @@ public class CanvasView extends View {
         canvas.drawBitmap(bitmap, 0, 0, paintScreen);
 
         for (Integer key : pathMap.keySet()) {
-            canvas.drawPath(pathMap.get(key), paintBrush);
+            canvas.drawPath(pathMap.get(key), activeBrush);
         }
     }
 
@@ -124,7 +137,7 @@ public class CanvasView extends View {
 
     private void touchEnded(int pointerId) {
         Path path = pathMap.get(pointerId); // get the related path
-        bitmapCanvas.drawPath(path, paintBrush); // draw to bimapCanvas
+        bitmapCanvas.drawPath(path, activeBrush); // draw to bimapCanvas
         path.reset();
     }
 
@@ -151,6 +164,24 @@ public class CanvasView extends View {
         paintBrush.setColor(color);
     }
 
+    public int getEraserWidth() {
+        return (int) eraser.getStrokeWidth();
+    }
+
+    public void setEraserWidth(int width) {
+        eraser.setStrokeWidth(width);
+    }
+
+    public void activateEraser() {
+        activeBrush = eraser;
+
+    }
+
+    public void activatePen() {
+        activeBrush = paintBrush;
+
+    }
+
     private void touchStarted(float x, float y, int pointerId) {
         Path path; // store the path of touches
         Point point; // store the last point in path
@@ -171,5 +202,10 @@ public class CanvasView extends View {
         path.moveTo(x, y);
         point.x = (int) x;
         point.y = (int) y;
+    }
+
+    public String saveImage() {
+        Helper helper = new Helper(getContext());
+        return helper.saveToInternalStorage(bitmap);
     }
 }

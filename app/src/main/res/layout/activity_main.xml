@@ -7,6 +7,14 @@
 
     <com.goodapps.simplewhiteboard.View.CanvasView
         android:layout_width="match_parent"
+        android:id="@+id/canvasView"
         android:layout_height="match_parent" />
-    vie
+
+    <RelativeLayout
+        android:layout_width="400dp"
+        android:layout_height="72dp"
+        android:layout_centerHorizontal="true">
+
+
+    </RelativeLayout>
 </RelativeLayout>

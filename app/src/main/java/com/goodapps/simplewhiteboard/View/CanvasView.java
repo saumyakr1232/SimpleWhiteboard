@@ -36,7 +36,7 @@ public class CanvasView extends View {
         paintBrush = new Paint();
         paintBrush.setAntiAlias(true);
         paintBrush.setColor(Color.BLUE);
-        paintBrush.setStrokeWidth(5);
+        paintBrush.setStrokeWidth(10);
         // End of line is round (as in microsoft whiteboard)
         paintBrush.setStrokeCap(Paint.Cap.ROUND);
         paintBrush.setStyle(Paint.Style.STROKE); // default is FILL_AND_STROKE which is bad
@@ -123,6 +123,32 @@ public class CanvasView extends View {
     }
 
     private void touchEnded(int pointerId) {
+        Path path = pathMap.get(pointerId); // get the related path
+        bitmapCanvas.drawPath(path, paintBrush); // draw to bimapCanvas
+        path.reset();
+    }
+
+    public void clear() {
+        pathMap.clear();
+        prevPointMap.clear();
+        bitmap.eraseColor(Color.WHITE);
+        invalidate(); // refresh the screen
+    }
+
+    public int getBrushWidth() {
+        return (int) paintBrush.getStrokeWidth();
+    }
+
+    public void setBrushWidth(int width) {
+        paintBrush.setStrokeWidth(width);
+    }
+
+    public int getBrushColor() {
+        return paintBrush.getColor();
+    }
+
+    public void setBrushColor(int color) {
+        paintBrush.setColor(color);
     }
 
     private void touchStarted(float x, float y, int pointerId) {

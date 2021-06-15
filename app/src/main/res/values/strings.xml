@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">SimpleWhiteboard</string>
+    <string name="alpha">Alpha</string>
+    <string name="red">Red</string>
+    <string name="green">Green</string>
+    <string name="blue">Blue</string>
+    <string name="done">Done</string>
 </resources>

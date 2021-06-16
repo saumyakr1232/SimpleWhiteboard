@@ -49,6 +49,9 @@ public class DrawingImage implements Parcelable {
         return url;
     }
 
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
 
     @Override
     public @NotNull String toString() {

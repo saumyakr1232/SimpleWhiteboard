@@ -2,7 +2,6 @@ package com.goodapps.simplewhiteboard.Models;
 
 import android.graphics.Path;
 
-;
 
 public class FingerPath {
     public int color;

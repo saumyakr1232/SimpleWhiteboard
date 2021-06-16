@@ -112,20 +112,12 @@ public class MainActivity extends AppCompatActivity implements FirebaseUtils.Com
 
         btnRedo.setOnClickListener(v -> canvasView.redo());
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnSave.setEnabled(false);
-                firebaseUtils.savePicture(canvasView.getBitmap());
-            }
+        btnSave.setOnClickListener(v -> {
+            btnSave.setEnabled(false);
+            firebaseUtils.savePicture(canvasView.getBitmap());
         });
 
-        btnOpenSaved.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, GalleryActivity.class));
-            }
-        });
+        btnOpenSaved.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, GalleryActivity.class)));
 
 
     }
@@ -150,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements FirebaseUtils.Com
 
     private void initViews() {
         eraser = findViewById(R.id.eraser);
+        eraser.getBackground().setTint(Color.GRAY);
         pen = findViewById(R.id.pen1);
         pen.getBackground().setTint(canvasView.getBrushColor());
         btnBrushColor = findViewById(R.id.btnBrushColor);
@@ -321,19 +314,16 @@ public class MainActivity extends AppCompatActivity implements FirebaseUtils.Com
 
         Button btnDone = view.findViewById(R.id.colorChangeDialogBtnDone);
 
-        btnDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                canvasView.setBrushColor(Color.argb(alphaSeekbar.getProgress(), redSeekbar.getProgress(), greenSeekbar.getProgress(), blueSeekbar.getProgress()));
-                if (!isEraserSelected) {
-                    canvasView.activatePen();
-                    pen.getBackground().setTint(canvasView.getBrushColor());
-                } else {
-                    canvasView.activateEraser();
-                }
-
-                currentDialog.dismiss();
+        btnDone.setOnClickListener(v -> {
+            canvasView.setBrushColor(Color.argb(alphaSeekbar.getProgress(), redSeekbar.getProgress(), greenSeekbar.getProgress(), blueSeekbar.getProgress()));
+            if (!isEraserSelected) {
+                canvasView.activatePen();
+                pen.getBackground().setTint(canvasView.getBrushColor());
+            } else {
+                canvasView.activateEraser();
             }
+
+            currentDialog.dismiss();
         });
 
         currentAlertDialog.setView(view);

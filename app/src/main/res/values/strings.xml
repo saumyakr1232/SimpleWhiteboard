@@ -14,4 +14,6 @@
     <string name="clear">Clear</string>
     <string name="button_save">Button Save</string>
     <string name="image">Image</string>
+    <string name="brush_width_visual_display">brush width visual display</string>
+
 </resources>

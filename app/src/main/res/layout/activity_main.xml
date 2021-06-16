@@ -69,7 +69,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:backgroundTint="@color/white"
             android:contentDescription="@string/brush"
             android:src="@drawable/ic_baseline_color_lens_36" />
 
@@ -78,7 +77,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:backgroundTint="@color/white"
             android:contentDescription="@string/eraser"
             android:src="@drawable/ic_baseline_radio_button_checked_36" />
 
@@ -87,7 +85,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:backgroundTint="@color/white"
             android:contentDescription="@string/brush_width"
             android:src="@drawable/ic_baseline_erase_portrait_36" />
 
@@ -96,7 +93,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:backgroundTint="@color/white"
             android:contentDescription="@string/undo"
             android:src="@drawable/ic_baseline_undo_36" />
 
@@ -106,7 +102,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:backgroundTint="@color/white"
             android:contentDescription="@string/redo"
             android:src="@drawable/ic_baseline_redo_36" />
 
@@ -131,7 +126,7 @@
             android:layout_marginEnd="8dp"
             android:background="@drawable/radio_button_background"
             android:backgroundTint="@color/black"
-            android:button="@color/purple_500"
+            android:button="@color/transparent"
             android:checked="true" />
 
 

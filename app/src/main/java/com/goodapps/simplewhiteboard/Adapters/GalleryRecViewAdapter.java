@@ -55,13 +55,10 @@ public class GalleryRecViewAdapter extends RecyclerView.Adapter<GalleryRecViewAd
                 .centerCrop()
                 .into(holder.galleryItemImageView);
 
-        holder.galleryItemImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, ExpandedImageView.class);
-                intent.putExtra("imageUrl", images.get(position).getUrl());
-                context.startActivity(intent);
-            }
+        holder.galleryItemImageView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ExpandedImageView.class);
+            intent.putExtra("imageUrl", images.get(position).getUrl());
+            context.startActivity(intent);
         });
 
 
@@ -72,15 +69,15 @@ public class GalleryRecViewAdapter extends RecyclerView.Adapter<GalleryRecViewAd
         return images.size();
     }
 
-    protected class ViewHolder extends RecyclerView.ViewHolder {
+    protected static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView galleryItemImageView;
         private final LinearLayout parent;
 
         public ViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
-            galleryItemImageView = (ImageView) itemView.findViewById(R.id.galleryItemImageView);
-            parent = (LinearLayout) itemView.findViewById(R.id.galleryItemParent);
+            galleryItemImageView = itemView.findViewById(R.id.galleryItemImageView);
+            parent = itemView.findViewById(R.id.galleryItemParent);
 
         }
     }

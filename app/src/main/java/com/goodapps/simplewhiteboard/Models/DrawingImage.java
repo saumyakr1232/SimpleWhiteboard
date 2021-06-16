@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.google.firebase.Timestamp;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class DrawingImage implements Parcelable {
     public static final Creator<DrawingImage> CREATOR = new Creator<DrawingImage>() {
@@ -47,13 +49,9 @@ public class DrawingImage implements Parcelable {
         return url;
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
-    }
-
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "DrawingImage{" +
                 "timestamp=" + timestamp +
                 ", name='" + name + '\'' +

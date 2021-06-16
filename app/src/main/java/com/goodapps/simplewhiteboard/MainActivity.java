@@ -1,18 +1,15 @@
 package com.goodapps.simplewhiteboard;
 
 import android.app.AlertDialog;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
-
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -22,10 +19,13 @@ import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+
 import com.goodapps.simplewhiteboard.Utils.FirebaseUtils;
 import com.goodapps.simplewhiteboard.View.CanvasView;
 
-public class MainActivity extends AppCompatActivity implements FirebaseUtils.PictureSaveCompleteListener {
+public class MainActivity extends AppCompatActivity implements FirebaseUtils.CompleteListener {
     private static final String TAG = "MainActivity";
     private CanvasView canvasView;
     private AlertDialog.Builder currentAlertDialog;
@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements FirebaseUtils.Pic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
         canvasView = findViewById(R.id.canvasView);
@@ -115,6 +117,13 @@ public class MainActivity extends AppCompatActivity implements FirebaseUtils.Pic
             public void onClick(View v) {
                 btnSave.setEnabled(false);
                 firebaseUtils.savePicture(canvasView.getBitmap());
+            }
+        });
+
+        btnOpenSaved.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, GalleryActivity.class));
             }
         });
 

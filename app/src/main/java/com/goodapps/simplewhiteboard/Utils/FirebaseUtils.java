@@ -4,14 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-
-import com.goodapps.simplewhiteboard.Picture;
+import com.goodapps.simplewhiteboard.Models.DrawingImage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
 
 import java.io.ByteArrayOutputStream;
 import java.util.Objects;
@@ -25,11 +24,17 @@ public class FirebaseUtils {
     public static final CollectionReference userPictureCollection = FirebaseFirestore.getInstance()
             .collection("users").document(USERID).collection(PICTURES);
     private static final String TAG = "FirebaseUtils";
-    private final PictureSaveCompleteListener saveCompleteListener;
+    private final CompleteListener completeListener;
 
     public FirebaseUtils(Context context) {
-        this.saveCompleteListener = (PictureSaveCompleteListener) context;
+        this.completeListener = (CompleteListener) context;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
     }
+
 
     public void savePicture(Bitmap bitmap) {
 
@@ -50,8 +55,8 @@ public class FirebaseUtils {
                     addPictureToCollection(downloadUrl, filename);
                 });
             } else {
-                Log.e(TAG, "onComplete: Unable to upload picture to Storage " + Objects.requireNonNull(task.getException()).getMessage());
-                saveCompleteListener.onFailure("Upload Failure");
+                Log.e(TAG, "onComplete: Unable to upload drawingImage to Storage " + Objects.requireNonNull(task.getException()).getMessage());
+                completeListener.onFailure("Upload Failure");
             }
         });
 
@@ -59,22 +64,25 @@ public class FirebaseUtils {
     }
 
     private void addPictureToCollection(String downloadUrl, String filename) {
-        Picture picture = new Picture(filename, downloadUrl);
+        DrawingImage drawingImage = new DrawingImage(filename, downloadUrl);
 
-        userPictureCollection.add(picture).addOnCompleteListener(task -> {
+        userPictureCollection.add(drawingImage).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                saveCompleteListener.onComplete("Added to Collection");
+                completeListener.onComplete("Added to Collection");
             } else {
-                saveCompleteListener.onFailure("Failed to add to Collection");
+                completeListener.onFailure("Failed to add to Collection");
             }
         });
     }
 
-    public interface PictureSaveCompleteListener {
+    public interface CompleteListener {
         void onComplete(String message);
 
         void onFailure(String message);
+
     }
+
+
 
 
 }

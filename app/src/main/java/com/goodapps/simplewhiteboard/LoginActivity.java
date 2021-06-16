@@ -1,21 +1,14 @@
 package com.goodapps.simplewhiteboard;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import org.jetbrains.annotations.NotNull;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -27,7 +20,6 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
-
 
         intent = new Intent(LoginActivity.this, MainActivity.class);
 
@@ -41,13 +33,13 @@ public class LoginActivity extends AppCompatActivity {
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            new Handler().postDelayed(() -> signInAnonymously(), 1000);
+            new Handler().postDelayed(this::signInAnonymously, 2000);
 
         } else {
             new Handler().postDelayed(() -> {
                 startActivity(intent);
                 // fetch images here
-            }, 3000);
+            }, 2000);
         }
 
 

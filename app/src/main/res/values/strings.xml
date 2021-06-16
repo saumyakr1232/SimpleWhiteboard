@@ -13,4 +13,5 @@
     <string name="control_center">Control Center</string>
     <string name="clear">Clear</string>
     <string name="button_save">Button Save</string>
+    <string name="image">Image</string>
 </resources>

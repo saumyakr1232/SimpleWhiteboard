@@ -8,27 +8,43 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.goodapps.simplewhiteboard.FingerPath;
 import com.goodapps.simplewhiteboard.Utils.Helper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 
 public class CanvasView extends View {
     public static final float TOUCH_TOLERANCE = 10;
     private static final String TAG = "CanvasView";
+    public static final int DEFAULT_COLOR = Color.RED;
+    public static final int DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+    public static final int DEFAULT_BRUSH_WIDTH = 15;
+    public static final int DEFAULT_ERASER_WIDTH = 15;
+    private int currentColor;
+    private int currentStrokeWidth;
+    private int backgroundColor;
     private Bitmap bitmap;
     private Canvas bitmapCanvas;
-    private Paint paintScreen;
     private Paint activeBrush;
     private Paint paintBrush;
     private Paint eraser;
+    private float mX;
+    private float mY;
+    private Path mPath;
     private HashMap<Integer, Path> pathMap;
     private HashMap<Integer, Point> prevPointMap;
+    private Stack<Integer> saved;
+    private ArrayList<FingerPath> fingerPaths;
 
 
     public CanvasView(Context context, @Nullable AttributeSet attrs) {
@@ -37,30 +53,42 @@ public class CanvasView extends View {
     }
 
     void init() {
-        paintScreen = new Paint();
+        currentColor = DEFAULT_COLOR;
+        currentStrokeWidth = DEFAULT_BRUSH_WIDTH;
+        backgroundColor = DEFAULT_BACKGROUND_COLOR;
         paintBrush = new Paint();
         paintBrush.setAntiAlias(true);
-        paintBrush.setColor(Color.BLUE);
-        paintBrush.setStrokeWidth(10);
+        paintBrush.setColor(DEFAULT_COLOR);
+        paintBrush.setStrokeWidth(DEFAULT_BRUSH_WIDTH);
         // End of line is round (as in microsoft whiteboard)
         paintBrush.setStrokeCap(Paint.Cap.ROUND);
         paintBrush.setStyle(Paint.Style.STROKE); // default is FILL_AND_STROKE which is bad
 
         eraser = new Paint();
         eraser.setAntiAlias(true);
-        eraser.setColor(Color.WHITE);
-        eraser.setStrokeWidth(15);
+        eraser.setColor(backgroundColor);
+        eraser.setStrokeWidth(DEFAULT_ERASER_WIDTH);
         eraser.setStrokeCap(Paint.Cap.ROUND);
         eraser.setStyle(Paint.Style.STROKE);
+
         pathMap = new HashMap<>();
         prevPointMap = new HashMap<>();
 
-        activeBrush = paintBrush;
+        activeBrush = new Paint();
+        activeBrush.setColor(currentColor);
+        activeBrush.setStrokeWidth(currentStrokeWidth);
+        activeBrush.setStrokeCap(Paint.Cap.ROUND);
+        activeBrush.setStyle(Paint.Style.STROKE);
+
+        saved = new Stack<>();
+
+        fingerPaths = new ArrayList<>();
 
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        Log.d(TAG, "onSizeChanged: Called");
         bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
         bitmapCanvas = new Canvas(bitmap);
         bitmap.eraseColor(Color.WHITE);
@@ -68,16 +96,21 @@ public class CanvasView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawBitmap(bitmap, 0, 0, paintScreen);
+        canvas.save();
+        bitmapCanvas.drawColor(backgroundColor);
 
-        for (Integer key : pathMap.keySet()) {
-            canvas.drawPath(pathMap.get(key), activeBrush);
+        for (FingerPath fp : fingerPaths) {
+            activeBrush.setColor(fp.color);
+            activeBrush.setStrokeWidth(fp.strokeWidth);
+
+            bitmapCanvas.drawPath(fp.path, activeBrush);
         }
+        canvas.drawBitmap(bitmap, 0, 0, activeBrush);
+        canvas.restore();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        Log.d(TAG, "onTouchEvent: Canvas Touched " + event.getActionMasked() );
 
         int action = event.getActionMasked(); // event type
         int actionIndex = event.getActionIndex(); // finger pointer (Index)
@@ -88,7 +121,6 @@ public class CanvasView extends View {
             touchStarted(event.getX(actionIndex), event.getY(actionIndex),
                     event.getPointerId(actionIndex));
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) { // touch ended
-//            Log.d(TAG, "onTouchEvent: " + event.getPointerId(actionIndex));
             touchEnded(event.getPointerId(actionIndex));
 
 
@@ -100,49 +132,45 @@ public class CanvasView extends View {
         return true;
     }
 
+    private void touchStarted(float x, float y, int pointerId) {
+        Log.d(TAG, "touchStarted: called " + pointerId);
+        mPath = new Path(); // store the path of touches
+        // store the last point in path
+
+        FingerPath fp = new FingerPath(currentColor, currentStrokeWidth, mPath);
+
+        fingerPaths.add(fp);
+        mPath.reset();
+        mPath.moveTo(x, y);
+        mX = x;
+        mY = y;
+
+
+    }
+
+
     private void touchMoved(MotionEvent event) {
+        float dx = Math.abs(event.getX() - mX);
+        float dy = Math.abs(event.getY() - mY);
 
-        for (int i = 0; i < event.getPointerCount(); i++) {
-            int pointerId = event.getPointerId(i);
-            int pointerIndex = event.findPointerIndex(pointerId);
+        if (dx >= TOUCH_TOLERANCE || dy > TOUCH_TOLERANCE) {
+            mPath.quadTo(mX, mY,
+                    (event.getX() + mX) / 2, (event.getY() + mY) / 2);
 
-            if (pathMap.containsKey(pointerId) && prevPointMap.containsKey(pointerId)) {
-                float newX = event.getX(pointerIndex);
-                float newY = event.getY(pointerIndex);
-
-                Path path = pathMap.get(pointerId);
-                Point point = prevPointMap.get(pointerId);
-
-                // calculate how far the user moved from the last update
-                float deltaX = Math.abs(newX - point.x);
-                float deltaY = Math.abs(newY - point.y);
-
-                // if distance is big enough to consider as movement
-                if (deltaX >= TOUCH_TOLERANCE || deltaY >= TOUCH_TOLERANCE) {
-                    // path to the new location
-                    path.quadTo(point.x, point.y,
-                            (newX + point.x) / 2, (newY + point.y) / 2);
-
-                    // store the new coordinates
-                    point.x = (int) newX;
-                    point.y = (int) newY;
-
-
-                }
-
-            }
+            mX = event.getX();
+            mY = event.getY();
         }
+
 
     }
 
     private void touchEnded(int pointerId) {
-        Path path = pathMap.get(pointerId); // get the related path
-        bitmapCanvas.drawPath(path, activeBrush); // draw to bimapCanvas
-        path.reset();
+        mPath.lineTo(mX, mY);
     }
 
     public void clear() {
         pathMap.clear();
+        fingerPaths.clear();
         prevPointMap.clear();
         bitmap.eraseColor(Color.WHITE);
         invalidate(); // refresh the screen
@@ -154,6 +182,7 @@ public class CanvasView extends View {
 
     public void setBrushWidth(int width) {
         paintBrush.setStrokeWidth(width);
+
     }
 
     public int getBrushColor() {
@@ -165,6 +194,7 @@ public class CanvasView extends View {
     }
 
     public int getEraserWidth() {
+        Log.d(TAG, "getEraserWidth: HERE " + eraser.getStrokeWidth());
         return (int) eraser.getStrokeWidth();
     }
 
@@ -173,39 +203,33 @@ public class CanvasView extends View {
     }
 
     public void activateEraser() {
-        activeBrush = eraser;
+        currentColor = backgroundColor;
+        currentStrokeWidth = (int) eraser.getStrokeWidth();
+
 
     }
 
     public void activatePen() {
-        activeBrush = paintBrush;
+        currentColor = paintBrush.getColor();
+        currentStrokeWidth = (int) paintBrush.getStrokeWidth();
 
     }
 
-    private void touchStarted(float x, float y, int pointerId) {
-        Path path; // store the path of touches
-        Point point; // store the last point in path
-
-        if (pathMap.containsKey(pointerId) && prevPointMap.containsKey(pointerId)) {
-            path = pathMap.get(pointerId);
-            point = prevPointMap.get(pointerId);
-        } else {
-            path = new Path();
-            pathMap.put(pointerId, path);
-            point = new Point();
-            prevPointMap.put(pointerId, point);
-
-        }
-
-
-        // move to the coordinates of the touch
-        path.moveTo(x, y);
-        point.x = (int) x;
-        point.y = (int) y;
-    }
 
     public String saveImage() {
         Helper helper = new Helper(getContext());
         return helper.saveToInternalStorage(bitmap);
+    }
+
+    public void undo() {
+        Log.d(TAG, "undo: Stack " + saved.toString());
+
+        if (!saved.isEmpty()) {
+            Integer stroke = saved.pop();
+
+        } else {
+            Toast.makeText(getContext(), "Nothing to undo", Toast.LENGTH_LONG).show();
+        }
+
     }
 }

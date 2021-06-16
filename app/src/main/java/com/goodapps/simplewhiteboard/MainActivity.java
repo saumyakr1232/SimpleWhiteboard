@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar greenSeekbar;
     private SeekBar blueSeekbar;
     private View colorPrevView;
+    private boolean isEraserSelected;
 
     private final SeekBar.OnSeekBarChangeListener colorSeekbarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
         canvasView = findViewById(R.id.canvasView);
         initViews();
 
+        isEraserSelected = false;
+
         btnClearCanvas.setOnClickListener(v -> canvasView.clear());
 
         btnOpenControls.setOnClickListener(v -> toggleControls());
@@ -81,22 +84,27 @@ public class MainActivity extends AppCompatActivity {
         btnEraserWidth.setOnClickListener(v -> showEraserWidthDialog());
 
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                Log.d(TAG, "onCheckedChanged: pen" + checkedId);
-                if (checkedId == R.id.eraser) {
-                    eraser.getBackground().setTint(getColor(R.color.red_200));
-                    pen.getBackground().setTint(Color.GRAY);
-                    canvasView.activateEraser();
-                    Toast.makeText(getApplicationContext(), "Eraser selected", Toast.LENGTH_SHORT).show();
-                } else {
-                    canvasView.activatePen();
-                    eraser.getBackground().setTint(Color.GRAY);
-                    pen.getBackground().setTint(canvasView.getBrushColor());
-                    Toast.makeText(getApplicationContext(), "Pen Selected", Toast.LENGTH_SHORT).show();
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            Log.d(TAG, "onCheckedChanged: pen" + checkedId);
+            if (checkedId == R.id.eraser) {
+                isEraserSelected = true;
+                eraser.getBackground().setTint(getColor(R.color.red_200));
+                pen.getBackground().setTint(Color.GRAY);
+                canvasView.activateEraser();
+                Toast.makeText(getApplicationContext(), "Eraser selected", Toast.LENGTH_SHORT).show();
+            } else {
+                canvasView.activatePen();
+                eraser.getBackground().setTint(Color.GRAY);
+                pen.getBackground().setTint(canvasView.getBrushColor());
+                Toast.makeText(getApplicationContext(), "Pen Selected", Toast.LENGTH_SHORT).show();
+                isEraserSelected = false;
+            }
+        });
 
-                }
+        btnUndo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                canvasView.undo();
             }
         });
 
@@ -168,6 +176,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 canvasView.setBrushWidth(widthSeekbar.getProgress());
+                if (!isEraserSelected) {
+                    canvasView.activatePen();
+                } else {
+                    canvasView.activateEraser();
+                }
                 Log.d(TAG, "onClick: currentDialog dismissed");
                 currentDialog.cancel();
                 currentAlertDialog = null;
@@ -214,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
         paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeWidth(canvasView.getBrushWidth());
+        paint.setStrokeWidth(canvasView.getEraserWidth());
         paint.setAntiAlias(true);
 
         bitmap.eraseColor(canvasView.getBrushColor());
@@ -229,6 +242,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 canvasView.setEraserWidth(widthSeekbar.getProgress());
+                if (!isEraserSelected) {
+                    canvasView.activatePen();
+                } else {
+                    canvasView.activateEraser();
+                }
                 Log.d(TAG, "onClick: currentDialog dismissed");
                 currentDialog.cancel();
                 currentAlertDialog = null;
@@ -293,7 +311,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 canvasView.setBrushColor(Color.argb(alphaSeekbar.getProgress(), redSeekbar.getProgress(), greenSeekbar.getProgress(), blueSeekbar.getProgress()));
-                pen.getBackground().setTint(canvasView.getBrushColor());
+                if (!isEraserSelected) {
+                    canvasView.activatePen();
+                    pen.getBackground().setTint(canvasView.getBrushColor());
+                } else {
+                    canvasView.activateEraser();
+                }
+
                 currentDialog.dismiss();
             }
         });

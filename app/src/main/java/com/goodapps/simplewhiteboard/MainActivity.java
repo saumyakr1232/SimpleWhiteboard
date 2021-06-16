@@ -22,9 +22,10 @@ import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.goodapps.simplewhiteboard.Utils.FirebaseUtils;
 import com.goodapps.simplewhiteboard.View.CanvasView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements FirebaseUtils.PictureSaveCompleteListener {
     private static final String TAG = "MainActivity";
     private CanvasView canvasView;
     private AlertDialog.Builder currentAlertDialog;
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar blueSeekbar;
     private View colorPrevView;
     private boolean isEraserSelected;
+
+    private FirebaseUtils firebaseUtils;
 
     private final SeekBar.OnSeekBarChangeListener colorSeekbarChangeListener = new SeekBar.OnSeekBarChangeListener() {
 
@@ -71,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
         canvasView = findViewById(R.id.canvasView);
         initViews();
 
+        firebaseUtils = new FirebaseUtils(this);
+
         isEraserSelected = false;
 
         btnClearCanvas.setOnClickListener(v -> canvasView.clear());
@@ -105,8 +110,17 @@ public class MainActivity extends AppCompatActivity {
 
         btnRedo.setOnClickListener(v -> canvasView.redo());
 
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnSave.setEnabled(false);
+                firebaseUtils.savePicture(canvasView.getBitmap());
+            }
+        });
+
 
     }
+
 
     private void toggleControls() {
         if (controlsLayout.getVisibility() == View.GONE) {
@@ -169,19 +183,16 @@ public class MainActivity extends AppCompatActivity {
         widthImageView.setImageBitmap(bitmap);
         widthSeekbar.setProgress(canvasView.getBrushWidth());
 
-        buttonDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                canvasView.setBrushWidth(widthSeekbar.getProgress());
-                if (!isEraserSelected) {
-                    canvasView.activatePen();
-                } else {
-                    canvasView.activateEraser();
-                }
-                Log.d(TAG, "onClick: currentDialog dismissed");
-                currentDialog.cancel();
-                currentAlertDialog = null;
+        buttonDone.setOnClickListener(v -> {
+            canvasView.setBrushWidth(widthSeekbar.getProgress());
+            if (!isEraserSelected) {
+                canvasView.activatePen();
+            } else {
+                canvasView.activateEraser();
             }
+            Log.d(TAG, "onClick: currentDialog dismissed");
+            currentDialog.cancel();
+            currentAlertDialog = null;
         });
 
         widthSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -235,19 +246,16 @@ public class MainActivity extends AppCompatActivity {
         widthSeekbar.setProgress(canvasView.getEraserWidth());
 
 
-        buttonDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                canvasView.setEraserWidth(widthSeekbar.getProgress());
-                if (!isEraserSelected) {
-                    canvasView.activatePen();
-                } else {
-                    canvasView.activateEraser();
-                }
-                Log.d(TAG, "onClick: currentDialog dismissed");
-                currentDialog.cancel();
-                currentAlertDialog = null;
+        buttonDone.setOnClickListener(v -> {
+            canvasView.setEraserWidth(widthSeekbar.getProgress());
+            if (!isEraserSelected) {
+                canvasView.activatePen();
+            } else {
+                canvasView.activateEraser();
             }
+            Log.d(TAG, "onClick: currentDialog dismissed");
+            currentDialog.cancel();
+            currentAlertDialog = null;
         });
 
         widthSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -327,4 +335,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onComplete(String message) {
+        btnSave.setEnabled(true);
+        Toast.makeText(this, "Image Saved", Toast.LENGTH_LONG).show();
+
+
+    }
+
+    @Override
+    public void onFailure(String message) {
+        btnSave.setEnabled(true);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+    }
 }

@@ -15,10 +15,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.goodapps.simplewhiteboard.FingerPath;
+import com.goodapps.simplewhiteboard.Models.FingerPath;
 import com.goodapps.simplewhiteboard.Utils.Helper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
@@ -215,12 +214,6 @@ public class CanvasView extends View {
 
     }
 
-
-    public String saveImage() {
-        Helper helper = new Helper(getContext());
-        return helper.saveToInternalStorage(bitmap);
-    }
-
     public void undo() {
 
         if (!fingerPaths.isEmpty()) {
@@ -243,5 +236,10 @@ public class CanvasView extends View {
 
         }
 
+    }
+
+
+    public Bitmap getBitmap() {
+        return bitmap;
     }
 }

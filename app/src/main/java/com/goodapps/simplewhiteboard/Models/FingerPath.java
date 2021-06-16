@@ -1,4 +1,4 @@
-package com.goodapps.simplewhiteboard;
+package com.goodapps.simplewhiteboard.Models;
 
 import android.graphics.Path;
 

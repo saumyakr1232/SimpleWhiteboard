@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "256444963972",
+    "project_id": "simplewhiteboard-df94d",
+    "storage_bucket": "simplewhiteboard-df94d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:256444963972:android:8cb6eb095ccf22d292f6d1",
+        "android_client_info": {
+          "package_name": "com.goodapps.simplewhiteboard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "256444963972-9bqk4sq1df4rbdjkq98kl5pfjlvcecos.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASja0liMiSrsObDngwNvXTpIy_g-OLET4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "256444963972-9bqk4sq1df4rbdjkq98kl5pfjlvcecos.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

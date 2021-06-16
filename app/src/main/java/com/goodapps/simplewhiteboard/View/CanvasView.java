@@ -43,7 +43,7 @@ public class CanvasView extends View {
     private Path mPath;
     private HashMap<Integer, Path> pathMap;
     private HashMap<Integer, Point> prevPointMap;
-    private Stack<Integer> saved;
+    private Stack<FingerPath> undoed;
     private ArrayList<FingerPath> fingerPaths;
 
 
@@ -80,7 +80,7 @@ public class CanvasView extends View {
         activeBrush.setStrokeCap(Paint.Cap.ROUND);
         activeBrush.setStyle(Paint.Style.STROKE);
 
-        saved = new Stack<>();
+        undoed = new Stack<>();
 
         fingerPaths = new ArrayList<>();
 
@@ -222,13 +222,25 @@ public class CanvasView extends View {
     }
 
     public void undo() {
-        Log.d(TAG, "undo: Stack " + saved.toString());
 
-        if (!saved.isEmpty()) {
-            Integer stroke = saved.pop();
-
+        if (!fingerPaths.isEmpty()) {
+            FingerPath poped = fingerPaths.get(fingerPaths.size() - 1);
+            fingerPaths.remove(fingerPaths.size() - 1);
+            undoed.push(poped);
+            invalidate();
         } else {
-            Toast.makeText(getContext(), "Nothing to undo", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Nothing to Undo", Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    public void redo() {
+        if (!undoed.isEmpty()) {
+            fingerPaths.add(undoed.pop());
+            invalidate();
+        } else {
+            Toast.makeText(getContext(), "Nothing to redo", Toast.LENGTH_LONG).show();
+
         }
 
     }

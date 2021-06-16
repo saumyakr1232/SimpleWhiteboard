@@ -101,12 +101,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btnUndo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                canvasView.undo();
-            }
-        });
+        btnUndo.setOnClickListener(v -> canvasView.undo());
+
+        btnRedo.setOnClickListener(v -> canvasView.redo());
 
 
     }
